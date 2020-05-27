@@ -15,6 +15,7 @@
  */
 package io.gravitee.am.repository.management.api;
 
+import io.gravitee.am.model.common.Page;
 import io.gravitee.am.model.uma.ResourceSet;
 import io.gravitee.am.repository.common.CrudRepository;
 import io.reactivex.Maybe;
@@ -28,6 +29,7 @@ import java.util.List;
  */
 public interface ResourceSetRepository extends CrudRepository<ResourceSet, String> {
 
+    Single<Page<ResourceSet>> findByDomainAndClient(String domain, String client, int page, int size);
     Single<List<ResourceSet>> findByDomainAndClientAndUser(String domain, String client, String userId);
     Single<List<ResourceSet>> findByDomainAndClientAndUserAndResource(String domain, String client, String userId, List<String> resource);
     Maybe<ResourceSet> findByDomainAndClientAndUserAndResource(String domain, String client, String userId, String resource);

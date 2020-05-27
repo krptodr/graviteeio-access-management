@@ -15,8 +15,10 @@
  */
 package io.gravitee.am.repository.mongodb.management;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.reactivestreams.client.MongoCollection;
 import io.gravitee.am.common.utils.RandomString;
+import io.gravitee.am.model.common.Page;
 import io.gravitee.am.model.uma.ResourceSet;
 import io.gravitee.am.repository.management.api.ResourceSetRepository;
 import io.gravitee.am.repository.mongodb.management.internal.model.uma.ResourceSetMongo;
@@ -24,10 +26,10 @@ import io.reactivex.Completable;
 import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.Single;
+import org.bson.Document;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.mongodb.client.model.Filters.*;
@@ -43,12 +45,15 @@ public class MongoResourceSetRepository extends AbstractManagementMongoRepositor
     private static final String FIELD_DOMAIN = "domain";
     private static final String FIELD_CLIENT = "clientId";
     private static final String FIELD_USER = "userId";
+    private static final String FIELD_UPDATED_AT = "updatedAt";
     public static final String COLLECTION_NAME = "uma_resource_set";
     private MongoCollection<ResourceSetMongo> resourceSetCollection;
 
     @PostConstruct
     public void init() {
         resourceSetCollection = mongoOperations.getCollection(COLLECTION_NAME, ResourceSetMongo.class);
+        super.createIndex(resourceSetCollection, new Document(FIELD_DOMAIN, 1).append(FIELD_CLIENT, 1));
+        super.createIndex(resourceSetCollection, new Document(FIELD_DOMAIN, 1).append(FIELD_CLIENT, 1).append(FIELD_USER, 1));
     }
 
     @Override
@@ -72,6 +77,13 @@ public class MongoResourceSetRepository extends AbstractManagementMongoRepositor
     @Override
     public Completable delete(String id) {
         return Completable.fromPublisher(resourceSetCollection.deleteOne(eq(FIELD_ID, id)));
+    }
+
+    @Override
+    public Single<Page<ResourceSet>> findByDomainAndClient(String domain, String client, int page, int size) {
+        Single<Long> countOperation = Observable.fromPublisher(resourceSetCollection.countDocuments(and(eq(FIELD_DOMAIN, domain), eq(FIELD_CLIENT, client)))).first(0l);
+        Single<List<ResourceSet>> resourcesOperation = Observable.fromPublisher(resourceSetCollection.find(and(eq(FIELD_DOMAIN, domain), eq(FIELD_CLIENT, client))).sort(new BasicDBObject(FIELD_UPDATED_AT, -1)).skip(size * page).limit(size)).map(this::convert).toList();
+        return Single.zip(countOperation, resourcesOperation, (count, resourceSets) -> new Page<>(resourceSets, page, count));
     }
 
     @Override

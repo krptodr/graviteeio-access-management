@@ -50,6 +50,13 @@ export class ApplicationCreationStep1Component {
       type: 'SERVICE',
       description: 'Machine-to-Machine apps',
       subDescription : 'e.g : Shell script, daemon, CLI'
+    },
+    {
+      name: 'UMA 2.0 Resource Server',
+      icon: 'folder_shared',
+      type: 'UMA_RESOURCE_SERVER',
+      description: 'Resource Server apps',
+      subDescription : 'e.g : .NET, Java'
     }];
 
   constructor() {}

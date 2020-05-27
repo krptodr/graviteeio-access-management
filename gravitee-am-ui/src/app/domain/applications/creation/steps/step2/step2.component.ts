@@ -34,15 +34,19 @@ export class ApplicationCreationStep2Component implements OnInit {
     },
     {
       icon: 'web',
-      type: 'BROWSER',
+      type: 'BROWSER'
     },
     {
       icon: 'devices_other',
-      type: 'NATIVE',
+      type: 'NATIVE'
     },
     {
       icon: 'storage',
-      type: 'SERVICE',
+      type: 'SERVICE'
+    },
+    {
+      icon: 'folder_shared',
+      type: 'UMA_RESOURCE_SERVER'
     }];
 
   constructor(private route: ActivatedRoute) { }
